@@ -1,0 +1,42 @@
+--Display cities that have more number of customers than the city Mysore
+select cust_city
+from customer_07
+group by cust_city
+having count(cust_id)>(select count(cust_id)
+from customer_07
+where cust_city='mysore');
+
+--Display top1 customer based on sales amount in every year
+select cust_name
+from
+(select c.cust_name cust_name,dense_rank() over(partition by s.sales_date order by s.amount desc) rnk
+from customer_07 c inner join sales_07 s
+on c.cust_id=s.cust_id)
+where rnk=1;
+
+--Display the customers and their status as 'sales done' and 'sales not done'
+select cust_name,(case when cust_id in (select cust_id from sales_07) then 'sales done'
+                                    else 'sales not done' end   )  cust_status
+from customer_07;
+
+--Display the customers who has most number of transactions
+--select c.cust_name
+from customer_07 c inner join sales_07 s
+on c.cust_id=s.cust_id
+group by c.cust_name
+having count(c.cust_id) =(select max(count(s.cust_id))
+                                            from customer_07 c inner join sales_07 s
+                                            on c.cust_id=s.cust_id
+                                            group by c.cust_name );
+
+--Display citywise no of customers and no of transactions
+
+--select c.cust_city,count(c.cust_id) over(partition by c.cust_city),count(s.sales_id) over(partition by c.cust_city)
+from customer_07 c inner join sales_07 s
+on c.cust_id=s.cust_id;
+
+
+---Display the customers where the phone number column contains 10 digits, all should be numbers.
+select cust_name
+from customer_07
+where length('phone_no')=10;
